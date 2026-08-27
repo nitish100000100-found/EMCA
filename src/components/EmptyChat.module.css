@@ -127,6 +127,42 @@
   max-width: 280px;
 }
 
+.fileErrorBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  color: #f87171;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.errorIcon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.closeErrorBtn {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+.closeErrorBtn:hover {
+  background-color: rgba(239, 68, 68, 0.25);
+}
+
 .fileName {
   white-space: nowrap;
   overflow: hidden;

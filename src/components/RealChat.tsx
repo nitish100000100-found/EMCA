@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { Plus, ArrowUp, Image as ImageIcon, FileText, X, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { Plus, ArrowUp, Image as ImageIcon, FileText, X, ExternalLink, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import styles from "./RealChat.module.css";
 
 interface ChatMessage {
@@ -19,12 +19,39 @@ export default function RealChat({ conversationId }: { conversationId: string | 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    setFileError(null);
+
+    if (!selectedFile) return;
+
+    // Check allowed MIME types
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setFileError("Only JPEG, PNG, WEBP, GIF, and PDF files are allowed");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    // Check file size (Max 5MB)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setFileError("File size must be smaller than 5 MB");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    setFile(selectedFile);
+  };
 
   useEffect(() => {
     if (!conversationId) return;
@@ -95,8 +122,10 @@ export default function RealChat({ conversationId }: { conversationId: string | 
           setMessages((prev) => [...prev, res.data.chat]);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Submit error:", err);
+      const errMsg = err?.response?.data?.error || "Failed to send message. Please try again.";
+      setFileError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -185,21 +214,35 @@ export default function RealChat({ conversationId }: { conversationId: string | 
         ref={imageInputRef}
         accept="image/*"
         style={{ display: "none" }}
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        onChange={handleFileSelect}
       />
       <input
         type="file"
         ref={pdfInputRef}
         accept="application/pdf"
         style={{ display: "none" }}
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        onChange={handleFileSelect}
       />
 
       {/* Input Form */}
       <form onSubmit={handleSubmit} className={styles.inputContainer}>
+        {fileError && (
+          <div className={styles.fileErrorBadge}>
+            <AlertCircle size={16} className={styles.errorIcon} />
+            <span>{fileError}</span>
+            <button
+              type="button"
+              className={styles.closeErrorBtn}
+              onClick={() => setFileError(null)}
+              title="Dismiss warning"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
         {file && (
           <div className={styles.fileBadge}>
-            <span>{file.name}</span>
+            <span>{file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
             <button type="button" className={styles.removeFileBtn} onClick={() => setFile(null)}>
               <X size={14} />
             </button>

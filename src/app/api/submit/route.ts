@@ -27,7 +27,18 @@ export async function POST(req: NextRequest) {
     let type = "text";
 
     if (file && file.size > 0) {
-      type = file.type === "application/pdf" ? "pdf" : "image";
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_SIZE) {
+        return NextResponse.json({ error: "File size must be smaller than 5 MB" }, { status: 400 });
+      }
+
+      const isPdf = file.type === "application/pdf";
+      const isImage = file.type.startsWith("image/");
+      if (!isPdf && !isImage) {
+        return NextResponse.json({ error: "Only image and PDF files are allowed" }, { status: 400 });
+      }
+
+      type = isPdf ? "pdf" : "image";
       const uploadRes = await uploadToCloudinary(file);
       fileUrl = uploadRes.secure_url;
     }

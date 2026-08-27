@@ -3,12 +3,13 @@
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Plus, ArrowUp, X, Image as ImageIcon, FileText, Sparkles, Loader2 } from "lucide-react";
+import { Plus, ArrowUp, X, Image as ImageIcon, FileText, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import styles from "./EmptyChat.module.css";
 
 export default function EmptyChat() {
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,12 +17,39 @@ export default function EmptyChat() {
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    setFileError(null);
+
+    if (!selectedFile) return;
+
+    // Check allowed MIME types
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setFileError("Only JPEG, PNG, WEBP, GIF, and PDF files are allowed");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    // Check file size (Max 5MB)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setFileError("File size must be smaller than 5 MB");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    setFile(selectedFile);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
     try {
       setLoading(true);
+      setFileError(null);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
       const formData = new FormData();
@@ -46,8 +74,10 @@ export default function EmptyChat() {
       setInput("");
       setFile(null);
       setIsMenuOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to submit chat:", error);
+      const errMsg = error?.response?.data?.error || "Failed to submit message. Please try again.";
+      setFileError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -136,10 +166,26 @@ export default function EmptyChat() {
             </div>
           )}
 
+          {/* File Validation Error Banner */}
+          {fileError && (
+            <div className={styles.fileErrorBadge}>
+              <AlertCircle size={16} className={styles.errorIcon} />
+              <span>{fileError}</span>
+              <button
+                type="button"
+                onClick={() => setFileError(null)}
+                className={styles.closeErrorBtn}
+                title="Dismiss warning"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
           {/* Selected File Tag */}
           {file && (
             <div className={styles.fileBadge}>
-              <span>{file.name}</span>
+              <span>{file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
               <button
                 type="button"
                 onClick={() => setFile(null)}
@@ -156,14 +202,14 @@ export default function EmptyChat() {
             ref={imageInputRef}
             accept="image/*"
             className={styles.hiddenFileInput}
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={handleFileSelect}
           />
           <input
             type="file"
             ref={pdfInputRef}
             accept="application/pdf"
             className={styles.hiddenFileInput}
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={handleFileSelect}
           />
 
           {/* Input Row */}
