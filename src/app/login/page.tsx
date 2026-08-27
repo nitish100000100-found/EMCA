@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import axios from "axios";
 import {
   GoogleLogin,
@@ -7,18 +8,23 @@ import {
   CredentialResponse,
 } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import styles from "./login.module.css";
 
 export default function Login() {
-      const router = useRouter();
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+
   const handleSuccess = async (
     credentialResponse: CredentialResponse
   ) => {
     try {
+      setLoading(true);
       const token = credentialResponse.credential;
 
       if (!token) {
         console.error("Google token missing");
+        setLoading(false);
         return;
       }
 
@@ -28,11 +34,12 @@ export default function Login() {
           token,
         }
       );
-         router.push("/");
+      router.push("/");
 
       console.log(res.data);
     } catch (error) {
       console.error("Login failed:", error);
+      setLoading(false);
     }
   };
 
@@ -63,20 +70,27 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Google Login */}
-            <div className={styles.googleWrapper}>
-              <GoogleLogin
-                onSuccess={handleSuccess}
-                onError={() => {
-                  console.log("Google Login Failed");
-                }}
-                theme="filled_black"
-                size="large"
-                text="continue_with"
-                shape="rectangular"
-                width="320"
-              />
-            </div>
+            {/* Google Login or Loading state */}
+            {loading ? (
+              <div className={styles.loadingWrapper}>
+                <Loader2 size={32} className={styles.spinner} />
+                <span>Signing in... Please wait</span>
+              </div>
+            ) : (
+              <div className={styles.googleWrapper}>
+                <GoogleLogin
+                  onSuccess={handleSuccess}
+                  onError={() => {
+                    console.log("Google Login Failed");
+                  }}
+                  theme="filled_black"
+                  size="large"
+                  text="continue_with"
+                  shape="rectangular"
+                  width="320"
+                />
+              </div>
+            )}
 
             {/* Divider */}
             <div className={styles.divider}>

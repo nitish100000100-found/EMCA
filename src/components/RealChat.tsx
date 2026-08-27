@@ -30,6 +30,7 @@ export default function RealChat({ conversationId }: { conversationId: string | 
     if (!conversationId) return;
 
     const getMessages = async () => {
+      setLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
         const res = await axios.post(
@@ -42,6 +43,8 @@ export default function RealChat({ conversationId }: { conversationId: string | 
         }
       } catch (e) {
         console.error("Failed to fetch messages:", e);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -50,7 +53,7 @@ export default function RealChat({ conversationId }: { conversationId: string | 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
 
   const handleSelectOption = (type: "image" | "pdf" | "generate") => {
     setIsMenuOpen(false);
@@ -107,7 +110,7 @@ export default function RealChat({ conversationId }: { conversationId: string | 
           <div className={styles.loadingContainer}>
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={28} />
+                <Loader2 className={styles.spinner} size={28} />
                 <span>Loading messages...</span>
               </>
             ) : (
@@ -115,50 +118,63 @@ export default function RealChat({ conversationId }: { conversationId: string | 
             )}
           </div>
         ) : (
-          messages.map((msg) => {
-            const isUser = msg.role === "user";
-            const pdfViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(msg.file_url || "")}`;
+          <>
+            {messages.map((msg) => {
+              const isUser = msg.role === "user";
+              const pdfViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(msg.file_url || "")}`;
 
-            return (
-              <div key={msg.id} className={`${styles.messageRow} ${isUser ? styles.userRow : styles.assistantRow}`}>
-                <div className={`${styles.avatar} ${isUser ? styles.userAvatar : styles.assistantAvatar}`}>
-                  {isUser ? "U" : "AI"}
+              return (
+                <div key={msg.id} className={`${styles.messageRow} ${isUser ? styles.userRow : styles.assistantRow}`}>
+                  <div className={`${styles.avatar} ${isUser ? styles.userAvatar : styles.assistantAvatar}`}>
+                    {isUser ? "U" : "AI"}
+                  </div>
+                  <div className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.assistantBubble}`}>
+                    {msg.type === "image" && msg.file_url && (
+                      <div className={styles.fileAttachment}>
+                        <a href={msg.file_url} target="_blank" rel="noopener noreferrer">
+                          <Image
+                            src={msg.file_url}
+                            alt="Attachment"
+                            width={300}
+                            height={200}
+                            className={styles.imagePreview}
+                            unoptimized
+                          />
+                        </a>
+                      </div>
+                    )}
+                    {msg.type === "pdf" && msg.file_url && (
+                      <div className={styles.fileAttachment}>
+                        <a href={pdfViewerUrl} target="_blank" rel="noopener noreferrer" className={styles.pdfCard}>
+                          <FileText size={20} color="#ef4444" />
+                          <div className={styles.pdfInfo}>
+                            <span className={styles.pdfName}>PDF Document</span>
+                          </div>
+                          <ExternalLink size={14} />
+                        </a>
+                      </div>
+                    )}
+                    {msg.content && (
+                      <div className={`${styles.messageContent} ${isUser ? styles.userContent : styles.assistantContent}`}>
+                        {msg.content}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.assistantBubble}`}>
-                  {msg.type === "image" && msg.file_url && (
-                    <div className={styles.fileAttachment}>
-                      <a href={msg.file_url} target="_blank" rel="noopener noreferrer">
-                        <Image
-                          src={msg.file_url}
-                          alt="Attachment"
-                          width={300}
-                          height={200}
-                          className={styles.imagePreview}
-                          unoptimized
-                        />
-                      </a>
-                    </div>
-                  )}
-                  {msg.type === "pdf" && msg.file_url && (
-                    <div className={styles.fileAttachment}>
-                      <a href={pdfViewerUrl} target="_blank" rel="noopener noreferrer" className={styles.pdfCard}>
-                        <FileText size={20} color="#ef4444" />
-                        <div className={styles.pdfInfo}>
-                          <span className={styles.pdfName}>PDF Document</span>
-                        </div>
-                        <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  )}
-                  {msg.content && (
-                    <div className={`${styles.messageContent} ${isUser ? styles.userContent : styles.assistantContent}`}>
-                      {msg.content}
-                    </div>
-                  )}
+              );
+            })}
+            {loading && (
+              <div className={`${styles.messageRow} ${styles.assistantRow}`}>
+                <div className={`${styles.avatar} ${styles.assistantAvatar}`}>
+                  AI
+                </div>
+                <div className={styles.loadingContent}>
+                  <Loader2 size={16} className={styles.spinner} />
+                  <span>EMCA is thinking...</span>
                 </div>
               </div>
-            );
-          })
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

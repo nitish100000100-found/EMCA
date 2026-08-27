@@ -161,6 +161,33 @@
   color: #565666;
 }
 
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 0;
+  color: #ececec;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: #3b82f6;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 /* Mobile Responsiveness */
 @media (max-width: 480px) {
   .container {

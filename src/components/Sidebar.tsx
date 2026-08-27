@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
-import { Plus, MessageSquare, LogOut } from "lucide-react";
+import { Plus, MessageSquare, LogOut, Loader2 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
 interface ChatItem {
@@ -21,6 +21,7 @@ interface UserInfo {
 export default function Sidebar() {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
   const params = useParams();
 
@@ -28,6 +29,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -50,6 +52,8 @@ export default function Sidebar() {
       } catch (error) {
         console.error("Fetch data error:", error);
         router.push("/login");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -62,6 +66,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
       await axios.post(`${apiUrl}/api/auth/logout`, {}, { withCredentials: true });
     } catch (e) {
@@ -75,7 +80,7 @@ export default function Sidebar() {
     <aside className={styles.sidebar}>
       {/* Top: Add New Chat Button */}
       <div className={styles.top}>
-        <button className={styles.newChatBtn} onClick={handleNewChat}>
+        <button className={styles.newChatBtn} onClick={handleNewChat} disabled={loading}>
           <Plus size={18} />
           <span>New chat</span>
         </button>
@@ -83,7 +88,12 @@ export default function Sidebar() {
 
       {/* Middle: Chat Previews wrapped in /lookforChat/[id] */}
       <div className={styles.middleList}>
-        {chats.length === 0 ? (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <Loader2 className={styles.spinner} size={16} />
+            <span>Loading chats...</span>
+          </div>
+        ) : chats.length === 0 ? (
           <div style={{ padding: "12px", color: "var(--text-muted)", fontSize: "0.85rem" }}>
             No chats available
           </div>
@@ -108,14 +118,21 @@ export default function Sidebar() {
       {/* Bottom: User Info & Logout Button */}
       <div className={styles.bottomFooter}>
         <div className={styles.userInfo}>
-          {user?.name && <span className={styles.userName}>{user.name}</span>}
-          <span className={styles.userEmail}>{user?.email || "User"}</span>
+          {loading ? (
+            <span className={styles.userEmail}>Loading profile...</span>
+          ) : (
+            <>
+              {user?.name && <span className={styles.userName}>{user.name}</span>}
+              <span className={styles.userEmail}>{user?.email || "User"}</span>
+            </>
+          )}
         </div>
-        <button className={styles.logoutBtn} onClick={handleLogout} title="Logout">
-          <LogOut size={16} />
+        <button className={styles.logoutBtn} onClick={handleLogout} title="Logout" disabled={loading}>
+          {loading ? <Loader2 className={styles.spinner} size={16} /> : <LogOut size={16} />}
           <span>Logout</span>
         </button>
       </div>
     </aside>
   );
 }
+

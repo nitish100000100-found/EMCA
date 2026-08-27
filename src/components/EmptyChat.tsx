@@ -65,8 +65,10 @@ export default function EmptyChat() {
   };
 
   const handleCardClick = (promptText: string) => {
+    if (loading) return;
     setInput(promptText);
   };
+
 
   return (
     <div className={styles.container}>
