@@ -1,0 +1,242 @@
+"use client";
+
+import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Plus, ArrowUp, X, Image as ImageIcon, FileText, Sparkles, Loader2 } from "lucide-react";
+import styles from "./EmptyChat.module.css";
+
+export default function EmptyChat() {
+  const [input, setInput] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    try {
+      setLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+
+      const formData = new FormData();
+      formData.append("message", input.trim());
+      formData.append("first", "true");
+      if (file) {
+        formData.append("file", file);
+      }
+
+      const res = await axios.post(`${apiUrl}/api/submit`, formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.data?.success && res.data?.conversation_id) {
+        console.log("Chat submitted successfully:", res.data);
+        router.push(`${apiUrl}/lookforChat/${res.data.conversation_id}`);
+      }
+
+      setInput("");
+      setFile(null);
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error("Failed to submit chat:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectOption = (type: "image" | "pdf" | "generate-image") => {
+    setIsMenuOpen(false);
+    if (type === "image") {
+      imageInputRef.current?.click();
+    } else if (type === "pdf") {
+      pdfInputRef.current?.click();
+    } else if (type === "generate-image") {
+      setInput("Create an image of ");
+    }
+  };
+
+  const handleCardClick = (promptText: string) => {
+    setInput(promptText);
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.contentWrapper}>
+        {/* Top Welcome Header */}
+        <div className={styles.header}>
+          <h1 className={styles.title}>Welcome to EMCA</h1>
+          <p className={styles.subtitle}>
+            What would you like to explore today? Ask questions, analyze PDFs,
+            or write code.
+          </p>
+        </div>
+
+        {/* Prompt Suggestion Cards */}
+        <div className={styles.promptGrid}>
+          <div
+            className={styles.promptCard}
+            onClick={() =>
+              handleCardClick("Write a Python script for web scraping")
+            }
+          >
+            <span className={styles.promptText}>Write code</span>
+            <span className={styles.promptSubtext}>Python script for scraping</span>
+          </div>
+          <div
+            className={styles.promptCard}
+            onClick={() =>
+              handleCardClick("Summarize the key points of this document")
+            }
+          >
+            <span className={styles.promptText}>Analyze document</span>
+            <span className={styles.promptSubtext}>Summarize key points</span>
+          </div>
+          <div
+            className={styles.promptCard}
+            onClick={() =>
+              handleCardClick("Explain quantum computing in simple terms")
+            }
+          >
+            <span className={styles.promptText}>Explain a concept</span>
+            <span className={styles.promptSubtext}>Quantum computing simply</span>
+          </div>
+          <div
+            className={styles.promptCard}
+            onClick={() =>
+              handleCardClick(
+                "Draft a professional email for a project update"
+              )
+            }
+          >
+            <span className={styles.promptText}>Help me write</span>
+            <span className={styles.promptSubtext}>Professional project email</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Input Form */}
+      <div className={styles.formWrapper}>
+        <form onSubmit={handleSubmit} className={styles.chatForm}>
+          {/* Sending Loader Status */}
+          {loading && (
+            <div className={styles.loadingStatus}>
+              <Loader2 size={16} className={styles.spinner} />
+              <span>Sending message...</span>
+            </div>
+          )}
+
+          {/* Selected File Tag */}
+          {file && (
+            <div className={styles.fileBadge}>
+              <span>{file.name}</span>
+              <button
+                type="button"
+                onClick={() => setFile(null)}
+                className={styles.removeFileBtn}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
+          {/* Hidden File Inputs for Photo & PDF */}
+          <input
+            type="file"
+            ref={imageInputRef}
+            accept="image/*"
+            className={styles.hiddenFileInput}
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+          <input
+            type="file"
+            ref={pdfInputRef}
+            accept="application/pdf"
+            className={styles.hiddenFileInput}
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+
+          {/* Input Row */}
+          <div className={styles.inputRow}>
+            {/* + Button & Dropdown Options */}
+            <div className={styles.attachWrapper}>
+              <button
+                type="button"
+                className={styles.attachBtn}
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                title="Add attachment"
+                disabled={loading}
+              >
+                <Plus size={20} />
+              </button>
+
+              {/* Popover Menu */}
+              {isMenuOpen && (
+                <div className={styles.menuPopover}>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={() => handleSelectOption("image")}
+                  >
+                    <ImageIcon size={18} color="#3b82f6" />
+                    <span>Upload Photo</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={() => handleSelectOption("pdf")}
+                  >
+                    <FileText size={18} color="#10a37f" />
+                    <span>Upload PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={() => handleSelectOption("generate-image")}
+                  >
+                    <Sparkles size={18} color="#a855f7" />
+                    <span>Generate Image</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Message EMCA..."
+              className={styles.inputField}
+              disabled={loading}
+            />
+
+            <button
+              type="submit"
+              className={styles.sendBtn}
+              title="Send"
+              disabled={!input.trim() || loading}
+            >
+              {loading ? (
+                <Loader2 size={18} className={styles.spinner} />
+              ) : (
+                <ArrowUp size={18} />
+              )}
+            </button>
+          </div>
+        </form>
+
+        <p className={styles.footerText}>
+          EMCA can make mistakes. Consider checking important info.
+        </p>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,224 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #171717;
+  color: #ececec;
+  padding: 32px 16px;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.bgGlow {
+  position: absolute;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brandContainer {
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  background-color: #ffffff;
+  color: #171717;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  user-select: none;
+}
+
+.card {
+  width: 100%;
+  background-color: #212121;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(16px);
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #ececec;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 0.9375rem;
+  color: #8e8ea0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.googleWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0;
+  width: 100%;
+}
+
+.dividerLine {
+  height: 1px;
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dividerText {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #6e6e80;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.termsText {
+  font-size: 0.75rem;
+  color: #6e6e80;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.link {
+  color: #a0a0b2;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #565666;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 12px;
+    align-items: center;
+  }
+
+  .wrapper {
+    max-width: 100%;
+  }
+
+  .brandContainer {
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .logoText {
+    font-size: 1.35rem;
+  }
+
+  .card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 1.45rem;
+    line-height: 1.25;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .divider {
+    margin: 22px 0;
+  }
+
+  .googleWrapper {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .card {
+    padding: 22px 16px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .termsText {
+    font-size: 0.7rem;
+  }
+}
