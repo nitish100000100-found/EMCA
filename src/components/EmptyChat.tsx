@@ -68,7 +68,7 @@ export default function EmptyChat() {
 
       if (res.data?.success && res.data?.conversation_id) {
         console.log("Chat submitted successfully:", res.data);
-        router.push(`${apiUrl}/lookforChat/${res.data.conversation_id}`);
+        router.push(`/lookforChat/${res.data.conversation_id}`);
       }
 
       setInput("");

@@ -51,4 +51,25 @@ const uploadToCloudinary = async (
   });
 };
 
-export { uploadToCloudinary };
+const uploadBufferToCloudinary = async (
+  buffer: Buffer,
+  publicId?: string,
+): Promise<UploadApiResponse> => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "emca",
+        public_id: publicId,
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error || !result) return reject(error);
+        resolve(result);
+      },
+    );
+
+    stream.end(buffer);
+  });
+};
+
+export { uploadToCloudinary, uploadBufferToCloudinary };

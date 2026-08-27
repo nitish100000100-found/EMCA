@@ -118,9 +118,11 @@ export default function RealChat({ conversationId }: { conversationId: string | 
         setFile(null);
         setIsMenuOpen(false);
 
-        if (res.data.chat) {
-          setMessages((prev) => [...prev, res.data.chat]);
-        }
+        const newItems: ChatMessage[] = [];
+        if (res.data.userChat) newItems.push(res.data.userChat);
+        if (res.data.aiChat) newItems.push(res.data.aiChat);
+
+        setMessages((prev) => [...prev, ...newItems]);
       }
     } catch (err: any) {
       console.error("Submit error:", err);

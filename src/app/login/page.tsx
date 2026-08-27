@@ -28,12 +28,10 @@ export default function Login() {
         return;
       }
 
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
-        {
-          token,
-        }
-      );
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const res = await axios.post(`${apiUrl}/api/auth/google`, {
+        token,
+      });
       router.push("/");
 
       console.log(res.data);
