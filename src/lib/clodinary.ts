@@ -2,7 +2,9 @@ import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 
 cloudinary.config({
   secure: true,
+  timeout: 60000,
 });
+
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -54,13 +56,14 @@ const uploadToCloudinary = async (
 const uploadBufferToCloudinary = async (
   buffer: Buffer,
   publicId?: string,
+  resourceType: "auto" | "image" | "raw" = "auto",
 ): Promise<UploadApiResponse> => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "emca",
         public_id: publicId,
-        resource_type: "image",
+        resource_type: resourceType,
       },
       (error, result) => {
         if (error || !result) return reject(error);

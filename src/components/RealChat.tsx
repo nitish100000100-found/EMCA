@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { Plus, ArrowUp, Image as ImageIcon, FileText, X, ExternalLink, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { Plus, ArrowUp, Image as ImageIcon, FileText, X, ExternalLink, Loader2, Sparkles, AlertCircle, Trash2 } from "lucide-react";
 import styles from "./RealChat.module.css";
 
 interface ChatMessage {
@@ -12,6 +12,7 @@ interface ChatMessage {
   type: "text" | "image" | "pdf";
   content: string;
   file_url: string | null;
+  chat_overview?: string;
   created_at: string;
 }
 
@@ -21,6 +22,8 @@ export default function RealChat({ conversationId }: { conversationId: string | 
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -133,8 +136,85 @@ export default function RealChat({ conversationId }: { conversationId: string | 
     }
   };
 
+  const handleDeleteConversation = async () => {
+    if (!conversationId) return;
+
+    try {
+      setDeleting(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const res = await axios.post(
+        `${apiUrl}/api/deletechat`,
+        { conversation_id: conversationId },
+        { withCredentials: true }
+      );
+
+      if (res.data?.success) {
+        window.location.href = "/";
+      }
+    } catch (err) {
+      console.error("Failed to delete conversation:", err);
+      
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const currentChatTitle = messages[0]?.chat_overview;
+
   return (
     <div className={styles.container}>
+      {/* Header Bar */}
+      <div className={styles.headerBar}>
+        <div className={styles.headerTitle}>
+          {currentChatTitle || (conversationId ? `Chat #${conversationId}` : "New Chat")}
+        </div>
+        <button
+          className={styles.deleteChatBtn}
+          onClick={() => setShowDeleteModal(true)}
+          disabled={deleting}
+          title="Delete Conversation"
+        >
+          <Trash2 size={16} />
+          <span>Delete Chat</span>
+        </button>
+      </div>
+
+      {/* Confirm Delete Modal */}
+      {showDeleteModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmBox}>
+            <div className={styles.confirmHeader}>
+              <Trash2 size={24} color="#ef4444" />
+              <h3>Delete Conversation</h3>
+            </div>
+            <p>
+              Are you sure you want to delete this entire chat conversation? This action cannot be undone.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmDeleteBtn}
+                onClick={handleDeleteConversation}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <Loader2 size={16} className={styles.spinner} />
+                ) : (
+                  "Yes, Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className={styles.messagesArea}>
         {messages.length === 0 ? (

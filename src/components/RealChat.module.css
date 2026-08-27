@@ -8,6 +8,47 @@
   overflow: hidden;
 }
 
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color, #2a2a2a);
+  background-color: var(--bg-sidebar, #171717);
+  z-index: 10;
+}
+
+.headerTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+}
+
+.deleteChatBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deleteChatBtn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.deleteChatBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .messagesArea {
   flex: 1;
   overflow-y: auto;
@@ -414,5 +455,82 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Confirm Delete Modal */
+.confirmBox {
+  background-color: var(--bg-sidebar, #1e1e1e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.confirmHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirmHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+  margin: 0;
+}
+
+.confirmBox p {
+  font-size: 0.9rem;
+  color: var(--text-muted, #aaaaaa);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--border-color, #444);
+  color: var(--text-primary, #ffffff);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cancelBtn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.confirmDeleteBtn {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.confirmDeleteBtn:hover {
+  opacity: 0.9;
 }
 

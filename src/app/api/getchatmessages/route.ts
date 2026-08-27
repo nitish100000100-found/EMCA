@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch messages for this conversation ordered chronologically
     const messagesRes = await pool.query(
-      `SELECT id, role, type, content, file_url, created_at 
+      `SELECT id, role, type, content, file_url, chat_overview, created_at 
        FROM chats 
        WHERE user_id = $1 AND conversation_id = $2 
        ORDER BY created_at ASC, id ASC`,

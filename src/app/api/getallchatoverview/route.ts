@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized: No token provided" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -19,22 +19,21 @@ export async function GET(req: NextRequest) {
     if (!payload || !payload.email) {
       return NextResponse.json(
         { success: false, message: "Invalid token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    
- const chatsResult = await pool.query(
-  `SELECT 
-     c.conversation_id AS id, 
-     MIN(c.chat_overview) AS name
-   FROM chats c
-   JOIN users u ON c.user_id = u.id
-   WHERE u.email = $1 
-   GROUP BY c.conversation_id
-   ORDER BY MAX(c.id) DESC`,
-  [payload.email]
-);
+    const chatsResult = await pool.query(
+      `SELECT 
+         c.conversation_id AS id, 
+         MIN(c.chat_overview) AS name
+       FROM chats c
+       JOIN users u ON c.user_id = u.id
+       WHERE u.email = $1 
+       GROUP BY c.conversation_id
+       ORDER BY MAX(c.id) DESC`,
+      [payload.email],
+    );
 
     return NextResponse.json({
       success: true,
@@ -44,7 +43,7 @@ export async function GET(req: NextRequest) {
     console.error("Error in /api/getallchatoverview:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

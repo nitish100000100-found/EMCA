@@ -13,7 +13,6 @@ export async function register() {
   }
 }
 
-
 /*
   instrumentation.ts server start hone par
   database connection check karta hai.
