@@ -1,16 +1,9 @@
 import { Pool } from "pg";
+import dns from "node:dns";
 
-// Enforce IPv4 resolution first in Node.js runtime to prevent IPv6 timeouts on mobile hotspots / AWS Neon endpoints
+// Prefer IPv4 when resolving database hostname
 if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const dns = require("dns");
-    if (dns && typeof dns.setDefaultResultOrder === "function") {
-      dns.setDefaultResultOrder("ipv4first");
-    }
-  } catch {
-    // Ignore in non-Node runtimes
-  }
+  dns.setDefaultResultOrder("ipv4first");
 }
 
 const pool =
